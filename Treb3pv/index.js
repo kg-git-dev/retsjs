@@ -4,7 +4,8 @@ const path = require('path');
 const redis = require('redis');
 const axios = require('axios');
 const { isLoggedIn, logOut, logIn } = require('./logInAndLogOut')
-const createConsoleLog = require('../Utils/createConsoleLog')
+const createConsoleLog = require('../Utils/createConsoleLog');
+const ensureDirectoryExists = require('../Utils/ensureDirectoryExists');
 
 const redisClient = redis.createClient();
 redisClient.connect();
@@ -190,6 +191,7 @@ const getImages = async (propertyMlsArray, photoDirectoriesName) => {
                     const objectIdMatch = parts[i].match(objectIdRegex);
                     const objectId = objectIdMatch[1];
                     const filename = path.join(__dirname, `../Data/${photoDirectoriesName}`, `Photos/${contentId}-${objectId}.${imageFormat}`);
+                    await ensureDirectoryExists(filename);
                     await fs.writeFile(filename, imageData, 'binary');
                     createConsoleLog(__filename, `completed writing for ${contentId}-${objectId}.${imageFormat}`)
 

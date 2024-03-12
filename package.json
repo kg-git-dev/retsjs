@@ -1,7 +1,7 @@
 {
   "name": "retsjs",
   "version": "1.0.0",
-  "description": "An express node js application that relays data via api end points whilst updating data with non intrusive operations via cron processes. Retreieves data from Real Estate Transaction Specifications qualified servers.",
+  "description": "An express node js application that relays data via api end points whilst updating data with non intrusive operations via cron processes. Retrieves data from Real Estate Transaction Specifications qualified servers.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

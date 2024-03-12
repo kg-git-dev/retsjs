@@ -9,6 +9,7 @@ const { deleteMatchingFiles } = require('./deleteImage');
 
 const returnPathForPropertyUpdates = require('../Update/propertyDetails');
 const createConsoleLog = require('../Utils/createConsoleLog');
+const ensureDirectoryExists = require('../Utils/ensureDirectoryExists');
 
 const findMissingMLS = (currentDatabaseSet, allPropertyMlsSet) => {
     var missingElementsSet = new Set();
@@ -32,6 +33,7 @@ const deletePropertyTypeMain = async (propertyTypeArray) => {
 
         const fileSavePath = path.join(__dirname, `../Data/${databaseDirectoryName}/allActive${propertyType}.xml`)
 
+        await ensureDirectoryExists(fileSavePath);
         await fs.writeFile(fileSavePath, getActiveListings.data)
 
         const initialXmlObject = require(`../Setup/ObjectSchemas/deleteObjectSchema`)

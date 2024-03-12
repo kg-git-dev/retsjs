@@ -2,7 +2,8 @@ const fs = require("fs").promises;
 
 const path = require('path');
 
-const createConsoleLog = require('../../Utils/createConsoleLog')
+const createConsoleLog = require('../../Utils/createConsoleLog');
+const ensureDirectoryExists = require("../../Utils/ensureDirectoryExists");
 
 // returnDatabasePathAndTable uses switch case to generate a set of predefined values. This includes naming conventions and path.
 // Changing paths and names will result in set up process being altered. Designed to be flexible for future modifications.
@@ -82,6 +83,7 @@ const updateDatabaseSchema = async (standardNameValues, propertyType, databaseSc
 
         // Write the updated schema.js content back to a new file with table name as name.
         const generatedSchemaFilePath = path.join(databaseSchemaDirectoryPath, `${tableName}.js`);
+        await ensureDirectoryExists(generatedSchemaFilePath);
         await fs.writeFile(generatedSchemaFilePath, schemaContent);
         createConsoleLog(__filename, `Schema updated successfully and saved to ${generatedSchemaFilePath}.`)
 

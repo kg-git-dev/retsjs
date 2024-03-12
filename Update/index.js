@@ -9,6 +9,7 @@ const { checkIfPropertyExists, createPropertyFunction, updatePropertyWithImagesF
 
 const returnPathForPropertyUpdates = require('./propertyDetails');
 const createConsoleLog = require('../Utils/createConsoleLog');
+const ensureDirectoryExists = require('../Utils/ensureDirectoryExists');
 
 const setImages = async (propertyMls, databaseDirectoryName) => {
     const batchSize = 10;
@@ -54,6 +55,7 @@ const getPropertyUpdates = async(updatePropertyType, updateFromTime) => {
         return;
     }
 
+    await ensureDirectoryExists(propertyUpdatePath);
     await fs.writeFile(propertyUpdatePath, propertyDataApi.data)
 
     const initialXmlObject = require(`../Setup/ObjectSchemas/${schemaName}`)
