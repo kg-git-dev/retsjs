@@ -194,7 +194,7 @@ const getImages = async (propertyMlsArray, photoDirectoriesName) => {
                     const filename = path.join(__dirname, `../Data/${photoDirectoriesName}`, `Photos/${contentId}-${objectId}.${imageFormat}`);
                     await ensureDirectoryExists(filename);
                     await fs.writeFile(filename, imageData, 'binary');
-                    createConsoleLog(__filename, `completed writing for ${contentId}-${objectId}.${imageFormat}`)
+                    // createConsoleLog(__filename, `completed writing for ${contentId}-${objectId}.${imageFormat}`)
 
                     // Check if the contentId already exists in updatedImagesObject
                     if (updatedImagesObject.hasOwnProperty(contentId)) {

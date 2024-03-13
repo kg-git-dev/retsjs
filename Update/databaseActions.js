@@ -54,7 +54,7 @@ const assignSearchAddress = (property) => {
 const updateListingPrice = async (property, databasePath, tableName) => {
     let oldPropertyValue = await checkIfPropertyExists(property.MLS, databasePath, tableName);
     if (oldPropertyValue.ListPrice !== property.ListPrice) {
-        createConsoleLog(__filename, `list price changed from ${oldProperty.ListPrice} to ${property.ListPrice}.`);
+        createConsoleLog(__filename, `list price changed from ${oldPropertyValue.ListPrice} to ${property.ListPrice}.`);
 
         // Update PriceTracker array with current ListPrice and TimestampSql
         const newPriceEntry = [property.ListPrice, property.TimestampSql];
