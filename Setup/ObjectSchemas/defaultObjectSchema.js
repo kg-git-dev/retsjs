@@ -7,7 +7,7 @@ const defaultObjectSchema = () => {
         PhotoCount: 0,
         MinListPrice: null,
         MaxListPrice: null,
-        PriceTracker: null,
+        PriceTracker: [],
         SearchAddress: null,
     };
 };
