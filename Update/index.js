@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs').promises;
+const redis = require('redis');
 const parsePropertyDataXml = require('../XMLParser')
 const utcTimeZoneFormatter = require('../Utils/utcTimeZoneFormatter');
 
@@ -10,6 +11,9 @@ const { checkIfPropertyExists, createPropertyFunction, updatePropertyWithImagesF
 const returnPathForPropertyUpdates = require('./propertyDetails');
 const createConsoleLog = require('../Utils/createConsoleLog');
 const ensureDirectoryExists = require('../Utils/ensureDirectoryExists');
+
+const redisClientToClearDb = redis.createClient();
+redisClientToClearDb.connect();
 
 const setImages = async (propertyMls, databaseDirectoryName) => {
     const batchSize = 10;
@@ -37,12 +41,12 @@ const setImages = async (propertyMls, databaseDirectoryName) => {
     return updatedImagesObject;
 }
 
-const getPropertyUpdates = async(updatePropertyType, updateFromTime) => {
+const getPropertyUpdates = async (updatePropertyType, updateFromTime) => {
 
     // For updates, we need to identify the database path and table name to be referenced. This is done via a switch case function: setUpPropertiesPath.
     // More information at './propertyDetails'.
     const { databaseName, databasePath, tableName, databaseDirectoryName, schemaName } = returnPathForPropertyUpdates(updatePropertyType);
-    
+
     // We pass the look up time to looks for updates in the specific time frame.
     // Logic is described in detail in '../Setup'.
     const timeStampSql = utcTimeZoneFormatter(updateFromTime);
@@ -65,9 +69,9 @@ const getPropertyUpdates = async(updatePropertyType, updateFromTime) => {
     // After parsing the property data, we have to consider the scenario for when properties are new, updated, have images, or images has been updated.
     // The algorith below makes comparison of the data from parsePropertyDataXml function and classifies properties on the type of operation to perform.
     // We have created an array clauseCollection that contains the specific sql query according to property type. 
-    
+
     const clauseCollection = [];
-    
+
     const imagesToBeDownloaded = [];
     const propertiesToBeCreated = new Set();
 
@@ -106,7 +110,7 @@ const getPropertyUpdates = async(updatePropertyType, updateFromTime) => {
             await updatePropertyWithImagesFunction(property, downloadImagesAndTheirNames[property.MLS], databasePath, tableName, clauseCollection);
         } else if (propertiesToBeUpdated.has(property.MLS)) {
             await updatePropertyFunction(property, databasePath, tableName, clauseCollection);
-        } 
+        }
     }
 
     // Finally, the clauses for specific property specified in the array is executed.
@@ -115,26 +119,31 @@ const getPropertyUpdates = async(updatePropertyType, updateFromTime) => {
     return;
 }
 
-const updatePropertyTypeMain = async(updatePropertyType, updateFromTime) => {
-     
+const updatePropertyTypeMain = async (updatePropertyType, updateFromTime) => {
+
     // updatePropertyType is a simple function that is meant to sequentially process an array of property types.
-     createConsoleLog(__filename, `initialized ${updatePropertyType.length} property types updated in ${updateFromTime} hours`);
-    
-     const allStartTime = new Date().getTime();
-     
-     for (const propertyType of updatePropertyType) {
-         let singlePropertyStartTimer = new Date().getTime();
-         createConsoleLog(__filename, `Started setup for ${propertyType}`);
-         await getPropertyUpdates(propertyType, updateFromTime);
-         let singlePropertyEndTimer = new Date().getTime();
-         let timeDifferenceForEach = (singlePropertyEndTimer - singlePropertyStartTimer) / 1000;
-         createConsoleLog(__filename, `Update completed for ${propertyType} in ${timeDifferenceForEach} seconds`);
-     }
-     
-     const allEndTime = new Date().getTime();
-     const timeDifferenceInSeconds = (allEndTime - allStartTime) / 1000;
-     createConsoleLog(__filename, `Update completed for ${updatePropertyType.length} property types in ${timeDifferenceInSeconds} seconds`);
-     process.exit();
+    createConsoleLog(__filename, `initialized ${updatePropertyType.length} property types updated in ${updateFromTime} hours`);
+
+    const allStartTime = new Date().getTime();
+
+    for (const propertyType of updatePropertyType) {
+        let singlePropertyStartTimer = new Date().getTime();
+        createConsoleLog(__filename, `Started setup for ${propertyType}`);
+        await getPropertyUpdates(propertyType, updateFromTime);
+
+        // Clear redis after each update
+        redisClientToClearDb.flushDb();
+
+        let singlePropertyEndTimer = new Date().getTime();
+        let timeDifferenceForEach = (singlePropertyEndTimer - singlePropertyStartTimer) / 1000;
+        createConsoleLog(__filename, `Update completed for ${propertyType} in ${timeDifferenceForEach} seconds`);
+    }
+
+
+    const allEndTime = new Date().getTime();
+    const timeDifferenceInSeconds = (allEndTime - allStartTime) / 1000;
+    createConsoleLog(__filename, `Update completed for ${updatePropertyType.length} property types in ${timeDifferenceInSeconds} seconds`);
+    process.exit();
 }
 
 module.exports = { updatePropertyTypeMain }

@@ -1,6 +1,7 @@
 const { getAllActiveListings } = require('../Treb3pv');
 const { getAllMLSValues, deleteRowsByMLS } = require('../Update/databaseActions');
 const path = require('path');
+const redis = require('redis');
 
 const fs = require('fs').promises;
 
@@ -10,6 +11,9 @@ const { deleteMatchingFiles } = require('./deleteImage');
 const returnPathForPropertyUpdates = require('../Update/propertyDetails');
 const createConsoleLog = require('../Utils/createConsoleLog');
 const ensureDirectoryExists = require('../Utils/ensureDirectoryExists');
+
+const redisClientToClearDb = redis.createClient();
+redisClientToClearDb.connect();
 
 const findMissingMLS = (currentDatabaseSet, allPropertyMlsSet) => {
     var missingElementsSet = new Set();
@@ -59,6 +63,10 @@ const deletePropertyTypeMain = async (propertyTypeArray) => {
 
         const photoDirectory = path.join(__dirname, `../Data/${databaseDirectoryName}/Photos/`)
 
+
+        // We need to clear cache before removing images
+        redisClientToClearDb.flushDb();
+        
         for (const mlsIndex of missingMLSArray) {
             await deleteMatchingFiles(photoDirectory, mlsIndex);
         }

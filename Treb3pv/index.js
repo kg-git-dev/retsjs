@@ -9,6 +9,7 @@ const ensureDirectoryExists = require('../Utils/ensureDirectoryExists');
 
 const redisClient = redis.createClient();
 redisClient.connect();
+redisClient.select(2);
 
 // The Treb3pv server responds with a cookies on successful login and the cookies are to be used for further interaction.
 // As such, all api calls are first passed through isLoggedIn function that checks for cookies and logs in if not available.

@@ -27,9 +27,10 @@ redisClient.on("error", (error) => console.error(`Redis Error: ${error}`));
 redisClient.connect();
 
 // Create Redis client for get-lat-long routes with a different database
-const getLatLongRedisClient = redis.createClient({ db: 1 }); 
+const getLatLongRedisClient = redis.createClient(); 
 getLatLongRedisClient.on("error", (error) => console.error(`GetLatLong Redis Error: ${error}`));
 getLatLongRedisClient.connect();
+getLatLongRedisClient.select(1);
 
 // Pass the Redis client to the routes
 app.use((req, res, next) => {
