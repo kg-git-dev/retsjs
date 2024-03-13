@@ -1,16 +1,13 @@
 const sqlite3 = require('sqlite3').verbose();
-const util = require('util');
+const createConsoleLog = require('../Utils/createConsoleLog');
 
-const createConsoleLog = require('../Utils/createConsoleLog')
-
-// writeToDatabase is a simple function that processes an array of objects and writes them into the specified database.
-// This function is meant to initialize a new property and as such is used in the set up process.
-// The function also passes the photo related to a specific property MLS value given that image exists.
+// writeToDatabase is a function that processes an array of objects and writes them into the specified database table.
+// This function is designed for initializing new properties and is used in the setup process.
+// It also handles associating photos with a specific property MLS value, provided the images exist.
 const writeToDatabase = async (propertyType, properties, databasePath, tableName, updatedImagesObject) => {
-    createConsoleLog(__filename, `writing ${propertyType} with ${properties.length} properties to database`)
+    createConsoleLog(__filename, `writing ${propertyType} with ${properties.length} properties to database`);
 
     const db = new sqlite3.Database(databasePath);
-    const dbRunAsync = util.promisify(db.run).bind(db);
 
     try {
         let startTime = new Date().getTime();
@@ -19,6 +16,7 @@ const writeToDatabase = async (propertyType, properties, databasePath, tableName
             property.MinListPrice = property.ListPrice;
             property.MaxListPrice = property.ListPrice;
 
+            // Generate a search address by concatenating and sanitizing property address components
             const searchAddress = [
                 property.Street,
                 property.StreetName,
@@ -27,9 +25,9 @@ const writeToDatabase = async (propertyType, properties, databasePath, tableName
                 property.Province,
                 "Canada"
             ].join(" ").toLowerCase().replace(/,/g, ""); // Concatenate and sanitize
-
             property.SearchAddress = searchAddress;
 
+            // Check if there are updated images for the current property
             if (updatedImagesObject.hasOwnProperty(property.MLS)) {
                 // Sort photoLink array based on the last numerical value with the smallest first
                 const sortedPhotoLink = updatedImagesObject[property.MLS].sort((a, b) => {
@@ -45,19 +43,24 @@ const writeToDatabase = async (propertyType, properties, databasePath, tableName
             const values = Object.values(property);
 
             const placeholders = keys.map(() => '?').join(', ');
+           
             const insertStatement = `INSERT INTO ${tableName} (${keys.join(', ')}) VALUES (${placeholders})`;
 
-            // Insert the property into the database
-            try {
-                await dbRunAsync(insertStatement, values);
-                createConsoleLog(__filename, `commited to database for ${property.MLS}`)
-            } catch (error) {
-                console.error('Error inserting property into the database:', error, property.MLS);
-            }
-
+            // Wrap the database operation in a promise
+            await new Promise((resolve, reject) => {
+                db.run(insertStatement, values, (err) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        createConsoleLog(__filename, `committed to database for ${property.MLS}`);
+                        resolve();
+                    }
+                });
+            });
         }
+
         let endTime = new Date().getTime();
-        const durationInSeconds = (endTime - startTime) / 1000; // Convert milliseconds to seconds
+        const durationInSeconds = (endTime - startTime) / 1000;
 
         createConsoleLog(__filename, `Total time for initial read/write operation ${durationInSeconds}`);
     } catch (error) {
@@ -71,5 +74,5 @@ const writeToDatabase = async (propertyType, properties, databasePath, tableName
     }
 };
 
+// Export the writeToDatabase function for use in other modules
 module.exports = writeToDatabase;
-

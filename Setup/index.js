@@ -94,7 +94,7 @@ const setUpProperties = async (setUpPropertyType, initialStartTime) => {
 const setImages = async (propertyMls, databaseDirectoryName) => {
     // The Treb3pv server responds with binary data of all photos relative to a listing in binary data. This means the response is huge.
     // As such, properties are batched into 10 and image data processed. 
-    const batchSize = 10;
+    const batchSize = 20;
     const totalProperties = propertyMls.length;
     let propertiesProcessed = 0;
     let updatedImagesObject = {};
@@ -114,7 +114,7 @@ const setImages = async (propertyMls, databaseDirectoryName) => {
 
         // Update the count of processed properties
         propertiesProcessed += batch.length;
-        createConsoleLog(__filename, `processed ${propertiesProcessed} out  of ${totalProperties} requests`)
+        createConsoleLog(__filename, `processed ${propertiesProcessed} out  of ${totalProperties} properties`)
     }
 
     createConsoleLog(__filename, `Image update completed`)

@@ -16,7 +16,7 @@ const redisClientToClearDb = redis.createClient();
 redisClientToClearDb.connect();
 
 const setImages = async (propertyMls, databaseDirectoryName) => {
-    const batchSize = 10;
+    const batchSize = 20;
     const totalProperties = propertyMls.length;
     let propertiesProcessed = 0;
     let updatedImagesObject = {};
