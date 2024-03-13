@@ -63,12 +63,6 @@ const updateDatabaseSchema = async (standardNameValues, propertyType, databaseSc
         // Generate the string to insert into schema.js
         const valuesString = standardNameValues.join(',\n');
 
-        // If there are no new fields, exit
-        if (valuesString.trim() === "") {
-            console.log("No new fields to add to schema.");
-            return;
-        }
-
         // Split schema content into lines
         let schemaLines = schemaContent.split('\n');
 

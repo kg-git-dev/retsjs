@@ -4,9 +4,7 @@ const path = require("path");
 const Properties = async (req, res) => {
   let results;
   const databaseQuery = req.databaseQuery;
-  console.log('came to controller', databaseQuery)
   const dbPath = getDatabasePath(req.dbName); // Get database path based on dbType
-  console.log('came to dpath', dbPath)
   try {
     const cacheResults = await req.redisClient.get(databaseQuery);
 

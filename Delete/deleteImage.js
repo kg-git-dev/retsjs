@@ -22,16 +22,14 @@ const deleteMatchingFiles = async (directory, mlsIndex) => {
     try {
         const matchingFiles = await getMatchingFiles(directory, mlsIndex);
 
-        console.log(matchingFiles);
-
         if (matchingFiles.length > 0) {
             await Promise.all(matchingFiles.map(async (file) => {
                 const filePath = path.join(directory, file);
                 await fs.unlink(filePath);
             }));
-            console.log(`Deleted ${matchingFiles.length} files.`); // Moved outside the loop
+            createConsoleLog(__filename, `Deleted ${matchingFiles.length} files.`); 
         } else {
-            console.log('No matching files found to delete.');
+            createConsoleLog(__filename, 'No matching files found to delete.');
         }
     } catch (err) {
         console.log('Error deleting files:', err);

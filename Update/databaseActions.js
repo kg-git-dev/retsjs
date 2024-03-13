@@ -261,7 +261,7 @@ const deleteRowsByMLS = async (MLSValuesSet, databasePath, tableName) => {
         // Commit the transaction
         await dbRunAsync('COMMIT');
 
-        console.log('Deleted rows successfully.');
+        createConsoleLog(__filename, 'Deleted rows successfully.');
     } catch (err) {
         // Rollback the transaction if an error occurs
         await dbRunAsync('ROLLBACK');
