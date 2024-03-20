@@ -27,6 +27,9 @@ const checkIfPropertyExists = async (MLS, databasePath, tableName) => {
 
 // Helper function to sort image file name based on their sequence.
 const generateSortedPhotoLink = (unsortedArray) => {
+    if (unsortedArray === undefined) {
+        return [];
+    }
 
     // Sort the array otherwise
     return unsortedArray.sort((a, b) => {
@@ -35,6 +38,7 @@ const generateSortedPhotoLink = (unsortedArray) => {
         return numA - numB;
     });
 };
+
 
 // Helper function to assign search address for easier address queries.
 const assignSearchAddress = (property) => {
@@ -79,10 +83,10 @@ const updateListingPrice = async (property, databasePath, tableName) => {
 const createPropertyFunction = (property, imageNamesArray, tableName, clauseCollection) => {
     property.MinListPrice = property.ListPrice;
     property.MaxListPrice = property.ListPrice;
-   
+
     assignSearchAddress(property);
 
-    if(imageNamesArray.length > 0){
+    if (imageNamesArray.length > 0) {
         const sortedPhotoLink = generateSortedPhotoLink(imageNamesArray);
         property.PhotoCount = sortedPhotoLink.length;
         property.PhotoLink = JSON.stringify(sortedPhotoLink)
@@ -167,7 +171,7 @@ const executeSqlQuery = async (clauseCollection, databasePath) => {
             });
         });
 
-        
+
         // Execute each SQL statement in the clauseCollection array
         for (const query of clauseCollection) {
             await new Promise((resolve, reject) => {
@@ -208,7 +212,7 @@ const executeSqlQuery = async (clauseCollection, databasePath) => {
                 });
             });
         }
-        
+
     } finally {
         // Close the database connection when done
         db.close();
@@ -226,7 +230,7 @@ const getAllMLSValues = async (databasePath, tableName) => {
     const db = new sqlite3.Database(dbPath);
 
     const dbAllAsync = util.promisify(db.all).bind(db);
-    
+
     try {
         const rows = await dbAllAsync(`SELECT MLS FROM ${tableName} WHERE PropertyType = ?`, [propertyType]);
         const mlsSet = new Set();
